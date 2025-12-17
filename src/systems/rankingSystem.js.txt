@@ -1,0 +1,10 @@
+export class RankingSystem {
+  constructor() {
+    this.recrutadores = new Map();
+  }
+
+  registrarRecrutamento(recrutador) {
+    const atual = this.recrutadores.get(recrutador) || 0;
+    this.recrutadores.set(recrutador, atual + 1);
+  }
+}

@@ -1,0 +1,67 @@
+import {
+  ChannelType,
+  PermissionFlagsBits,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle
+} from "discord.js";
+import config from "../../config.json" assert { type: "json" };
+
+export class TicketEliteSystem {
+  constructor(client) {
+    this.client = client;
+  }
+
+  async criar(interaction) {
+    const nome = interaction.fields.getTextInputValue("nome");
+    const id = interaction.fields.getTextInputValue("id");
+    const motivo = interaction.fields.getTextInputValue("motivo");
+    const clip = interaction.fields.getTextInputValue("clip") || "Não enviado";
+
+    const channel = await interaction.guild.channels.create({
+      name: `elite-${interaction.user.username}`,
+      type: ChannelType.GuildText,
+      parent: config.elite.categoria,
+      permissionOverwrites: [
+        { id: interaction.guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+        { id: interaction.user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
+        { id: config.cargos.respElite, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] }
+      ]
+    });
+
+    const embed = new EmbedBuilder()
+      .setTitle("⭐ TICKET ELITE — NINE")
+      .setColor("#6a0dad")
+      .addFields(
+        { name: "Nome", value: nome },
+        { name: "ID", value: id },
+        { name: "Motivo", value: motivo },
+        { name: "Clip", value: clip }
+      )
+      .setFooter({ text: `Solicitado por ${interaction.user.tag}` });
+
+    const row = new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId("elite_aprovar").setLabel("Aprovar").setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId("elite_reprovar").setLabel("Reprovar").setStyle(ButtonStyle.Danger)
+    );
+
+    await channel.send({ embeds: [embed], components: [row] });
+
+    await interaction.reply({
+      content: "⭐ Ticket Elite criado.",
+      ephemeral: true
+    });
+  }
+
+  async finalizar(interaction, aprovado) {
+    if (aprovado) {
+      await interaction.member.roles.add(config.cargos.elite).catch(() => {});
+      this.client.logger.eliteAprovado(interaction.user, interaction.member);
+    } else {
+      this.client.logger.eliteReprovado(interaction.user, interaction.member);
+    }
+
+    interaction.channel.delete().catch(() => {});
+  }
+}

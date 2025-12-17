@@ -1,0 +1,35 @@
+import config from "../../config.json" assert { type: "json" };
+import { EmbedBuilder } from "discord.js";
+
+export class SetinSystem {
+  constructor(client) {
+    this.client = client;
+  }
+
+  async executar({ member, nome, id, recrutador }) {
+    // mudar nick
+    await member.setNickname(`[M] ${nome} | ${id}`).catch(() => {});
+
+    // setar cargo membro
+    await member.roles.add(config.cargos.membro).catch(() => {});
+
+    // ranking de recrutamento
+    this.client.ranking.registrarRecrutamento(recrutador);
+
+    // log
+    const canal = await this.client.channels.fetch(config.canais.logSetin).catch(() => null);
+    if (!canal) return;
+
+    const embed = new EmbedBuilder()
+      .setTitle("📋 NOVO SETIN — NINE")
+      .setColor("#6a0dad")
+      .addFields(
+        { name: "Membro", value: `<@${member.id}>`, inline: true },
+        { name: "Recrutador", value: recrutador, inline: true },
+        { name: "Nome | ID", value: `${nome} | ${id}` }
+      )
+      .setTimestamp();
+
+    canal.send({ embeds: [embed] });
+  }
+}
