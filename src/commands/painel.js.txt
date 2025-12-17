@@ -8,135 +8,48 @@ import {
 
 export const data = new SlashCommandBuilder()
   .setName("painel")
-  .setDescription("Criar painéis oficiais da facção NINE")
-  .addStringOption(opt =>
-    opt
-      .setName("tipo")
-      .setDescription("Qual painel deseja criar")
-      .setRequired(true)
-      .addChoices(
-        { name: "Setin", value: "setin" },
-        { name: "Ação", value: "acao" },
-        { name: "Elite", value: "elite" },
-        { name: "Ranking", value: "ranking" },
-        { name: "Hierarquia", value: "hierarquia" }
-      )
-  );
+  .setDescription("Abrir painel da facção");
 
-export async function execute(interaction) {
-  const tipo = interaction.options.getString("tipo");
-
-  /* ================= SETIN ================= */
-  if (tipo === "setin") {
+export async function execute(interaction, client) {
+  try {
     const embed = new EmbedBuilder()
-      .setTitle("📋 SETIN OFICIAL — NINE")
+      .setTitle("🟣 Painel da Facção NINE")
       .setDescription(
-        "Para entrar oficialmente na **NINE**, realize seu setin corretamente.\n\n" +
-        "🟣 Processo rápido e automático\n" +
-        "🟣 Sem erro de nome ou ID\n" +
-        "🟣 Registro automático de recrutamento\n\n" +
-        "Clique no botão abaixo para iniciar."
+        "Selecione uma opção abaixo:\n\n" +
+        "📌 **Setar-se na facção**\n" +
+        "🎯 **Criar ação**\n" +
+        "⭐ **Ticket Elite**"
       )
-      .setColor("#6a0dad")
-      .setFooter({ text: "NINE • Sistema Automático" });
+      .setColor("#6a0dad");
 
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("abrir_setin")
-        .setLabel("✅ Fazer Setin")
-        .setStyle(ButtonStyle.Primary)
-    );
+        .setCustomId("painel_setin")
+        .setLabel("Pedir Set")
+        .setStyle(ButtonStyle.Primary),
 
-    await interaction.channel.send({ embeds: [embed], components: [row] });
-  }
-
-  /* ================= AÇÃO ================= */
-  if (tipo === "acao") {
-    const embed = new EmbedBuilder()
-      .setTitle("🎯 PAINEL DE AÇÕES — NINE")
-      .setDescription(
-        "Aqui são organizadas todas as ações da facção.\n\n" +
-        "⚠️ Apenas **Resp.Elite** e **Aux.Elite** podem criar ações\n" +
-        "🟣 Escalação automática\n" +
-        "🟣 Resultado registrado no ranking da facção\n\n" +
-        "Clique abaixo para criar uma nova ação."
-      )
-      .setColor("#6a0dad")
-      .setFooter({ text: "NINE • Ações RP" });
-
-    const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId("abrir_acao")
-        .setLabel("🎯 Criar Ação")
+        .setCustomId("painel_acao")
+        .setLabel("Criar Ação")
+        .setStyle(ButtonStyle.Secondary),
+
+      new ButtonBuilder()
+        .setCustomId("painel_elite")
+        .setLabel("Ticket Elite")
         .setStyle(ButtonStyle.Success)
     );
 
-    await interaction.channel.send({ embeds: [embed], components: [row] });
+    await interaction.reply({
+      embeds: [embed],
+      components: [row],
+      ephemeral: true
+    });
+
+  } catch (err) {
+    console.error("ERRO NO /painel:", err);
+    await interaction.reply({
+      content: "❌ Erro interno no painel.",
+      ephemeral: true
+    });
   }
-
-  /* ================= ELITE ================= */
-  if (tipo === "elite") {
-    const embed = new EmbedBuilder()
-      .setTitle("⭐ SISTEMA ELITE — NINE")
-      .setDescription(
-        "A **Elite** é destinada aos membros que se destacam em ações e postura.\n\n" +
-        "🟣 Preencha o formulário corretamente\n" +
-        "🟣 Envie clip se possível\n" +
-        "🟣 Avaliação feita pela Resp.Elite\n\n" +
-        "Clique abaixo para solicitar."
-      )
-      .setColor("#6a0dad")
-      .setFooter({ text: "NINE • Elite" });
-
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("abrir_elite")
-        .setLabel("⭐ Quero ser Elite")
-        .setStyle(ButtonStyle.Primary)
-    );
-
-    await interaction.channel.send({ embeds: [embed], components: [row] });
-  }
-
-  /* ================= RANKING ================= */
-  if (tipo === "ranking") {
-    const embed = new EmbedBuilder()
-      .setTitle("🏆 RANKING DE AÇÕES — NINE")
-      .setDescription(
-        "📊 **Resumo geral da facção**\n\n" +
-        "🎯 Total de ações: **0**\n" +
-        "🟢 Vitórias: **0**\n" +
-        "🔴 Derrotas: **0**\n\n" +
-        "Este painel é atualizado automaticamente."
-      )
-      .setColor("#6a0dad")
-      .setFooter({ text: "NINE • Ranking Global" });
-
-    await interaction.channel.send({ embeds: [embed] });
-  }
-
-  /* ================= HIERARQUIA ================= */
-  if (tipo === "hierarquia") {
-    const embed = new EmbedBuilder()
-      .setTitle("👑 HIERARQUIA — NINE")
-      .setDescription(
-        "**👑 LIDERANÇA**\n" +
-        "00 • 01 • 02 • 03\n\n" +
-        "**⭐ GESTÃO**\n" +
-        "Sub-Líder • Gerente Geral • Gerentes\n\n" +
-        "**🔥 ELITE**\n" +
-        "Resp.Elite • Aux.Elite • Elite\n\n" +
-        "**👥 BASE**\n" +
-        "Membros"
-      )
-      .setColor("#6a0dad")
-      .setFooter({ text: "NINE • Estrutura Oficial" });
-
-    await interaction.channel.send({ embeds: [embed] });
-  }
-
-  await interaction.reply({
-    content: "✅ Painel criado com sucesso.",
-    ephemeral: true
-  });
 }

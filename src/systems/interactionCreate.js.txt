@@ -1,0 +1,62 @@
+import fs from "fs";
+
+const config = JSON.parse(
+  fs.readFileSync(new URL("../../config.json", import.meta.url))
+);
+
+export const name = "interactionCreate";
+
+export async function execute(interaction, client) {
+  try {
+    // ======================
+    // SLASH COMMANDS
+    // ======================
+    if (interaction.isChatInputCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) return;
+
+      await command.execute(interaction, client);
+      return;
+    }
+
+    // ======================
+    // BOTÕES DO PAINEL
+    // ======================
+    if (interaction.isButton()) {
+
+      // PEDIR SET
+      if (interaction.customId === "painel_setin") {
+        return interaction.reply({
+          content: "📌 Sistema de setin será aberto aqui.",
+          ephemeral: true
+        });
+      }
+
+      // CRIAR AÇÃO
+      if (interaction.customId === "painel_acao") {
+        return interaction.reply({
+          content: "🎯 Sistema de ação será aberto aqui.",
+          ephemeral: true
+        });
+      }
+
+      // TICKET ELITE
+      if (interaction.customId === "painel_elite") {
+        return interaction.reply({
+          content: "⭐ Sistema de ticket Elite será aberto aqui.",
+          ephemeral: true
+        });
+      }
+    }
+
+  } catch (err) {
+    console.error("❌ ERRO NO interactionCreate:", err);
+
+    if (!interaction.replied) {
+      await interaction.reply({
+        content: "❌ Erro interno no bot.",
+        ephemeral: true
+      });
+    }
+  }
+}
